@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block content %}
+<h1>Analisa Peperiksaan & GPS</h1><p class="muted">Pilih peperiksaan untuk melihat GPS keseluruhan, GPS setiap mata pelajaran, purata, markah tertinggi/rendah dan taburan gred.</p>
+<div class="action-grid">{% for e in exams %}<a class="action" href="{{url_for('analysis_exam',eid=e.id)}}"><b>{{e.exam_name}}</b><span>{{e.session_year}} · {{e.exam_type}}{% if e.series_no %} · Siri {{e.series_no}}{% endif %}</span><span>Status: {{e.status}}</span></a>{% endfor %}</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% block content %}
+<h1>Tetapan Gred UPKK</h1>
+<p><b>{{exam.exam_name}}</b> · Sesi {{exam.session_year}} · Status: <b>{{exam.status}}</b></p>
+{% if exam.status=='Diterbitkan' %}<div class="callout"><b>Tetapan dikunci.</b> Keputusan telah diterbitkan supaya slip lama tidak berubah.</div>
+{% else %}<div class="callout">Tetapan ini khas untuk peperiksaan ini. Admin boleh ubah julat gred dan mata GPS sebelum keputusan diterbitkan.</div>{% endif %}
+<form method="post"><div class="callout"><b>Julat automatik:</b> ubah nilai Minimum A, B atau C sahaja. Nilai Maksimum akan diselaraskan automatik supaya tiada markah yang tercicir tanpa gred.</div>
+
+
+{% for scheme,title,full in [('UPKK70','Subjek Bertulis /70',70),('UPKK100','Subjek /100',100)] %}
+<div class="panel"><h2>{{title}}</h2><table><thead><tr><th>Gred</th><th>Minimum</th><th>Maksimum</th><th>Mata GPS</th></tr></thead><tbody>
+{% for g in ['A','B','C','D'] %}{% set r=rules[scheme][g] %}<tr><td><b>{{g}}</b></td>
+<td><input type="number" step="1" min="0" max="{{full}}" name="{{scheme}}_{{g}}_min" value="{{r.min_score|int}}" required {% if exam.status=='Diterbitkan' or g=='D' %}readonly{% endif %}></td>
+<td><input type="number" step="1" min="0" max="{{full}}" name="{{scheme}}_{{g}}_max" value="{{r.max_score|int}}" readonly required {% if exam.status=='Diterbitkan' %}disabled{% endif %}></td>
+<td><input type="number" step="0.01" min="0" name="{{scheme}}_{{g}}_point" value="{{r.gps_point}}" required {% if exam.status=='Diterbitkan' %}disabled{% endif %}></td></tr>{% endfor %}
+</tbody></table></div>{% endfor %}
+{% if exam.status!='Diterbitkan' %}<button class="button" type="submit">Simpan Tetapan Gred</button>{% endif %}
+<a class="button secondary" href="{{url_for('exams')}}">Kembali</a></form>
+<script>
+function syncRanges(scheme,full){
+ const q=(g,k)=>document.querySelector(`[name="${scheme}_${g}_${k}"]`);
+ const sync=()=>{
+   q('A','max').value=full;
+   q('B','max').value=Number(q('A','min').value)-1;
+   q('C','max').value=Number(q('B','min').value)-1;
+   q('D','min').value=0;
+   q('D','max').value=Number(q('C','min').value)-1;
+ };
+ ['A','B','C'].forEach(g=>q(g,'min').addEventListener('input',sync)); sync();
+}
+document.addEventListener('DOMContentLoaded',()=>{syncRanges('UPKK70',70);syncRanges('UPKK100',100);});
+</script>
+{% endblock %}

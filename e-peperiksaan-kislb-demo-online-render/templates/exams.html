@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Peperiksaan</h1>
+<div class="panel">
+<h2>Tambah peperiksaan / siri</h2>
+<form method="post" class="grid-form">
+<label>Sesi<input name="session_year" type="number" value="2026" required></label>
+<label>Jenis<select name="exam_type">
+<option>UPSA</option><option>UASA</option><option>PSRA</option><option>UPKK</option><option>PERCUBAAN UPKK</option><option>PERCUBAAN PSRA</option>
+<option>GERAK GEMPUR UPKK</option><option>GERAK GEMPUR PSRA</option>
+</select></label>
+<label>Nama<input name="exam_name" placeholder="Gerak Gempur UPKK Siri 1" required></label>
+<label>Siri (jika ada)<input name="series_no" type="number" min="1"></label>
+<label>Status<select name="status"><option>Draf</option><option>Sedang Key-in</option><option>Semakan</option><option>Diterbitkan</option></select></label>
+<button>Tambah</button>
+<p class="muted">Nota: Gerak Gempur PSRA dan Gerak Gempur UPKK hanya Siri 1 atau Siri 2. Percubaan ialah peperiksaan berasingan.</p></form>
+</div>
+<div class="panel">
+<table><thead><tr><th>Sesi</th><th>Peperiksaan</th><th>Siri</th><th>Status</th><th>Tetapan Gred</th><th>Tukar Status</th></tr></thead><tbody>
+{% for e in exams %}
+<tr><td>{{e.session_year}}</td><td><b>{{e.exam_name}}</b><br><small>{{e.exam_type}}</small></td><td>{{e.series_no or '-'}}</td><td>{{e.status}}</td>
+<td>{% if e.exam_type in ['UPKK','PERCUBAAN UPKK','GERAK GEMPUR UPKK'] %}<a class="button secondary" href="{{url_for('exam_grade_settings',eid=e.id)}}">Tetapan Gred</a>{% else %}-{% endif %}</td>
+<td><form method="post" action="{{url_for('exam_status',eid=e.id)}}" class="inline"><select name="status"><option>Draf</option><option>Sedang Key-in</option><option>Semakan</option><option>Diterbitkan</option></select><button>Simpan</button></form></td></tr>
+{% endfor %}
+</tbody></table>
+</div>
+{% endblock %}

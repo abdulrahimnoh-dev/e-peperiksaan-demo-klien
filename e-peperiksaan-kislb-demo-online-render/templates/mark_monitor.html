@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block content %}
+<div class="split-title"><div><h1>Pemantauan Pengisian Markah</h1><p class="muted">Semak kemajuan semua kelas dan subjek sebelum keputusan diterbitkan.</p></div></div>
+{% for s in summaries %}
+<div class="panel">
+  <div style="display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap">
+    <div><h2 style="margin-bottom:4px">{{s.exam.exam_name}}</h2><span class="muted">{{s.exam.session_year}} · {{s.exam.status}}</span></div>
+    {% if s.ready %}<span class="status-chip">Semua Markah Lengkap</span>{% else %}<span class="pill">Belum Lengkap</span>{% endif %}
+  </div>
+  <div class="cards" style="margin-top:14px">
+    <div class="card"><span>Kelas/Subjek Lengkap</span><b>{{s.complete}} / {{s.total}}</b></div>
+    <div class="card"><span>Sedang Diisi</span><b>{{s.partial}}</b></div>
+    <div class="card"><span>Belum Lengkap</span><b>{{s.total-s.complete}}</b></div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px">
+    <a class="button" href="{{url_for('mark_monitor_exam',eid=s.exam.id)}}">Lihat Perincian</a>
+    {% if s.ready and s.exam.status != 'Diterbitkan' %}
+    <form method="post" action="{{url_for('exam_status',eid=s.exam.id)}}" class="inline" onsubmit="return confirm('Terbitkan keputusan ini kepada ibu bapa? Selepas diterbitkan, guru tidak boleh key-in/edit melalui modul guru.')">
+      <input type="hidden" name="status" value="Diterbitkan"><button>Terbitkan Keputusan</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% else %}<div class="panel">Belum ada peperiksaan.</div>{% endfor %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Kelas & Sesi</h1>
+<div class="panel">
+<form method="post" class="grid-form">
+<label>Sesi<input name="session_year" type="number" value="2026" required></label>
+<label>Tahun<input name="level" type="number" min="1" max="6" required></label>
+<label>Nama kelas<input name="class_name" placeholder="5 Al-Farabi" required></label>
+<button>Simpan kelas</button>
+</form>
+</div>
+<div class="panel"><table><thead><tr><th>Sesi</th><th>Tahun</th><th>Kelas</th></tr></thead><tbody>
+{% for c in classes %}<tr><td>{{c.session_year}}</td><td>{{c.level}}</td><td>{{c.class_name}}</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

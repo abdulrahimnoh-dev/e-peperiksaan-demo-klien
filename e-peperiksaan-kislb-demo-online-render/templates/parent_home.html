@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Anak Saya</h1>
+<div class="action-grid">
+{% for s in students %}<a class="action" href="{{url_for('parent_student',sid=s.id)}}"><b>{{s.full_name}}</b><span>{{s.mykid}}</span></a>{% endfor %}
+</div>
+{% endblock %}

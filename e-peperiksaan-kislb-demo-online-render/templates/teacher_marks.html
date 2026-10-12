@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Guru · Isi Markah</h1>
+<p class="muted">Peperiksaan, kelas dan subjek yang ditugaskan kepada anda.</p>
+{% if not exams %}<div class="panel"><p>Tiada tugasan peperiksaan untuk akaun guru ini.</p></div>{% endif %}
+{% for e in exams %}
+<div class="panel">
+  <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+    <div><h2 style="margin-bottom:4px">{{e.exam_name}}</h2><span class="muted">{{e.session_year}} · {{e.status}}</span></div>
+  </div>
+  {% set editable = e.status in ['Sedang Key-in','Semakan'] %}
+  {% if not editable %}
+    <div class="callout" style="margin-top:12px">Tugasan telah diberikan, tetapi key-in belum dibuka. Admin perlu tukar status peperiksaan kepada <b>Sedang Key-in</b> atau <b>Semakan</b>.</div>
+  {% endif %}
+  <div class="action-grid" style="margin-top:14px">
+  {% set ns=namespace(found=false) %}
+  {% for a in assignments if a.exam_id == e.id and a.session_year == e.session_year and a.subject_id in allowed[e.id] %}
+    {% set ns.found=true %}
+    {% set p=progress.get((e.id,a.class_id,a.subject_id)) %}
+    {% if editable %}
+    <a class="action" href="{{url_for('mark_entry',eid=e.id,cid=a.class_id,subid=a.subject_id)}}">
+      <b>{{a.class_name}}</b><span>{{a.subject_name}}</span>
+      {% if p %}<span style="margin-top:7px"><b>{{p.status}}</b> · {{p.filled}}/{{p.total}} murid lengkap</span>{% endif %}
+    </a>
+    {% else %}
+    <div class="action" style="opacity:.7;cursor:not-allowed">
+      <b>{{a.class_name}}</b><span>{{a.subject_name}}</span><span style="margin-top:7px"><b>Belum Dibuka</b></span>
+    </div>
+    {% endif %}
+  {% endfor %}
+  {% if not ns.found %}<p class="muted">Tiada tugasan subjek anda untuk peperiksaan ini.</p>{% endif %}
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

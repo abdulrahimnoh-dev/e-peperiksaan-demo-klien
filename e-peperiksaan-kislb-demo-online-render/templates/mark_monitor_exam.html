@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block content %}
+<div class="split-title"><div><h1>{{exam.exam_name}}</h1><p class="muted">Pemantauan markah · {{exam.session_year}} · {{exam.status}}</p></div>
+{% if ready %}<div class="status-chip">Semua Markah Lengkap</div>{% else %}<div class="pill">Belum Lengkap</div>{% endif %}</div>
+{% if ready and exam.status != 'Diterbitkan' %}
+<div class="callout"><b>Semua kelas dan subjek sudah lengkap.</b> Keputusan kini boleh diterbitkan kepada ibu bapa.
+<form method="post" action="{{url_for('exam_status',eid=exam.id)}}" style="margin-top:10px" onsubmit="return confirm('Terbitkan keputusan ini kepada ibu bapa?')"><input type="hidden" name="status" value="Diterbitkan"><button>Terbitkan Keputusan</button></form></div>
+{% elif exam.status == 'Diterbitkan' %}<div class="callout"><b>Keputusan telah diterbitkan.</b> Ibu bapa yang dipautkan kepada murid boleh melihat slip.</div>
+{% else %}<div class="callout"><b>Belum boleh diterbitkan.</b> Lengkapkan semua markah di bawah dahulu.</div>{% endif %}
+{% for class_name,items in grouped.items() %}
+<div class="panel"><h2>{{class_name}}</h2><table><thead><tr><th>Subjek</th><th>Guru Bertanggungjawab</th><th>Kemajuan</th><th>Status</th></tr></thead><tbody>
+{% for r in items %}<tr><td><b>{{r.subject_name}}</b></td><td>{{r.teacher_names}}</td><td>{{r.complete}} / {{r.total}} murid</td><td><b>{{r.status}}</b></td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<div class="panel">Tiada murid untuk sesi peperiksaan ini.</div>{% endfor %}
+<a class="button secondary" href="{{url_for('mark_monitor')}}">Kembali</a>
+{% endblock %}

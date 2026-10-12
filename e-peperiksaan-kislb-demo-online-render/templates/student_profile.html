@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="profile-hero">
+  <div>
+    <a href="{{ url_for('students') }}" class="back-link">← Kembali ke Senarai Murid</a>
+    <h1>{{ student.full_name }}</h1>
+    <p class="muted">No. MyKid: {{ student.mykid }}{% if current %} · {{ current.session_year }} · {{ current.class_name }}{% endif %}</p>
+  </div>
+  <div class="profile-actions"><a class="button secondary-btn" href="{{ url_for('edit_student',sid=student.id) }}">Edit / Sejarah Kelas</a></div>
+</div>
+<div class="cards profile-cards">
+  <div class="card"><span>Status Murid</span><b class="small-value">{{ 'Aktif' if student.active else 'Tidak Aktif' }}</b></div>
+  <div class="card"><span>Kelas Semasa</span><b class="small-value">{{ current.class_name if current else '-' }}</b></div>
+  <div class="card"><span>Bil. Peperiksaan</span><b>{{ results|length }}</b></div>
+</div>
+{% if results %}
+<div class="panel">
+  <div class="panel-title-row"><div><h2>Graf Perkembangan Prestasi</h2><p class="muted">Purata peratus setiap peperiksaan. Semakin tinggi semakin baik.</p></div></div>
+  <div style="overflow-x:auto"><svg id="studentPerfChart" viewBox="0 0 900 290" style="width:100%;min-width:680px;height:290px"></svg></div>
+</div>
+<script>
+(function(){
+ const data={{ results|map(attribute='avg')|list|tojson }};
+ const labels=[
+ {% for r in results %}
+   {% set en=(r.exam.exam_name or '')|upper %}
+   {% if 'GERAK GEMPUR PSRA' in en %}
+     {{ ('GG PSRA S' ~ (r.exam.series_no or ''))|tojson }},
+   {% elif r.exam.exam_type in ['UPSA','UASA','PSRA'] %}
+     {{ (r.exam.exam_type ~ ' ' ~ r.exam.session_year)|tojson }},
+   {% elif 'PERCUBAAN PSRA' in en %}
+     {{ ('Perc. PSRA ' ~ r.exam.session_year)|tojson }},
+   {% elif 'PERCUBAAN UPKK' in en %}
+     {{ ('Perc. UPKK ' ~ r.exam.session_year)|tojson }},
+   {% else %}
+     {{ (r.exam.exam_name or '')|tojson }},
+   {% endif %}
+ {% endfor %}
+ ];
+ const svg=document.getElementById('studentPerfChart'),NS='http://www.w3.org/2000/svg',W=900,H=290,L=50,R=25,T=20,B=60,pw=W-L-R,ph=H-T-B;
+ function add(n,a,txt){const e=document.createElementNS(NS,n);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));if(txt!==undefined)e.textContent=txt;svg.appendChild(e);return e;}
+ [0,25,50,75,100].forEach(v=>{let y=T+ph-(v/100)*ph;add('line',{x1:L,y1:y,x2:W-R,y2:y,stroke:'#d8e0e7'});add('text',{x:L-8,y:y+4,'text-anchor':'end','font-size':12,fill:'#667085'},v+'%')});
+ const pts=[];data.forEach((v,i)=>{if(v===null)return;let x=L+(data.length===1?pw/2:i*pw/(data.length-1)),y=T+ph-(v/100)*ph;pts.push(x+','+y)});if(pts.length>1)add('polyline',{points:pts.join(' '),fill:'none',stroke:'#087a55','stroke-width':3});
+ data.forEach((v,i)=>{if(v===null)return;let x=L+(data.length===1?pw/2:i*pw/(data.length-1)),y=T+ph-(v/100)*ph;add('circle',{cx:x,cy:y,r:5,fill:'#087a55'});add('text',{x:x,y:y-10,'text-anchor':'middle','font-size':12,'font-weight':'bold'},v+'%');let lab=labels[i]||'';add('text',{x:x,y:H-30,'text-anchor':'middle','font-size':11,fill:'#667085'},lab)});
+})();
+</script>
+{% endif %}
+{% if trend %}
+<div class="panel">
+  <div class="panel-title-row"><div><h2>Trend Gerak Gempur Individu</h2><p class="muted">GPS lebih rendah menunjukkan prestasi yang lebih baik.</p></div></div>
+  <div class="trend-list">{% for t in trend %}<div class="trend-row"><div><b>{{ t.exam.exam_name }}</b><span>{{ t.exam.session_year }} · Siri {{ t.exam.series_no }}</span></div><div class="trend-gps">{{ t.gps if t.gps is not none else '-' }}</div><div><span class="status-pill {{ 'up' if t.status=='Meningkat' else ('down' if t.status=='Menurun' else 'same') }}">{{ t.status }}</span></div></div>{% endfor %}</div>
+</div>
+{% endif %}
+<div class="panel">
+  <div class="panel-title-row"><div><h2>Sejarah Keputusan</h2><p class="muted">Semua peperiksaan yang mempunyai markah untuk murid ini.</p></div></div>
+  {% if not results %}<p>Belum ada markah peperiksaan untuk murid ini.</p>{% endif %}
+  {% for r in results %}<details class="result-card" {% if loop.first %}open{% endif %}><summary><div><b>{{ r.exam.exam_name }}</b><span>{{ r.exam.session_year }} · {{ r.exam.exam_type }} · {{ r.exam.status }}</span></div><div class="result-summary-metrics"><span>GPS <b>{{ r.gps if r.gps is not none else '-' }}</b></span><span>Purata <b>{{ r.avg if r.avg is not none else '-' }}</b></span></div></summary><div class="result-body"><table><thead><tr><th>Mata Pelajaran</th><th>Markah</th><th>Gred</th><th>Mata</th></tr></thead><tbody>{% for s in r.subjects %}<tr><td>{{ s.name }}</td><td>{{ s.score if s.score is not none else '-' }}</td><td><b>{{ s.grade or '-' }}</b></td><td>{{ s.point if s.point is not none else '-' }}</td></tr>{% endfor %}</tbody></table><div class="result-actions"><a class="button" href="{{ url_for('slip',eid=r.exam.id,sid=student.id) }}">Lihat / Cetak Slip</a></div></div></details>{% endfor %}
+</div>
+<div class="panel"><h2>Sejarah Kelas</h2><table><thead><tr><th>Sesi</th><th>Tahun</th><th>Kelas</th><th>Mula</th><th>Tamat</th><th>Status</th></tr></thead><tbody>{% for h in history %}<tr><td>{{h.session_year}}</td><td>{{h.level}}</td><td>{{h.class_name}}</td><td>{{h.start_date or '-'}}</td><td>{{h.end_date or '-'}}</td><td>{{'Semasa' if h.is_current else 'Sejarah'}}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

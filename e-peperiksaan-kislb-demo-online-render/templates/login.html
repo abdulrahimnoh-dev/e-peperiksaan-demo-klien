@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Login | e-Peperiksaan KISLB{% endblock %}
+{% block content %}
+<section class="login-card login-branded">
+<img class="login-logo" src="{{ url_for('static',filename='logo-kislb.png') }}" alt="Logo KISLB">
+<h1>Log masuk</h1>
+<p class="muted">Portal e-Peperiksaan KAFA Integrasi Sungai Lang Baru</p>
+<form method="post">
+<label>Nama pengguna<input name="username" required autocomplete="username"></label>
+<label>Kata laluan<input name="password" type="password" required autocomplete="current-password"></label>
+<button>Log masuk</button>
+</form>
+<div class="demo"><b>Akaun demo pembangunan</b><br>Admin: admin / admin123<br>Guru: guru / guru123<br>Ibu bapa: ibu / ibu123</div>
+</section>
+{% endblock %}

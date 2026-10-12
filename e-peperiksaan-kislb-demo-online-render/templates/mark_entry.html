@@ -1,0 +1,56 @@
+{% extends "base.html" %}{% block content %}
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap">
+<div><h1>{{exam.exam_name}}</h1><p><b>{{cls.class_name}}</b> · {{subject.name}} · Markah penuh {{subject.max_score}}</p></div>
+<div class="callout" style="margin:0"><b>Status: {{entry_status}}</b><br>{{complete_count}} / {{total_students}} murid lengkap</div>
+</div>
+<div class="callout"><b>Cara isi:</b> masukkan markah setiap komponen. Sistem semak markah maksimum dan mengira jumlah serta gred secara automatik. Jumlah hanya dikira apabila semua komponen murid telah diisi.</div>
+<form method="post" id="marksForm">
+<div class="panel" style="overflow-x:auto"><table><thead><tr><th>Bil</th><th>Nama Murid</th><th>MyKid</th>
+{% for c in components %}<th>{{c.name}}<br><small>/{{c.max_score|int}}</small></th>{% endfor %}
+<th>Jumlah</th><th>Gred</th></tr></thead><tbody>
+{% for s in students %}
+<tr data-student="{{s.id}}">
+<td>{{loop.index}}</td><td><b>{{s.full_name}}</b></td><td>{{s.mykid}}</td>
+{% for c in components %}
+<td><input class="score live-score" data-max="{{c.max_score}}" name="c_{{s.id}}_{{c.id}}" type="number" step="{{ 1 if subject.scheme_key in ['UPKK70','UPKK100'] else 0.01 }}" min="0" max="{{c.max_score}}" value="{{'' if values.get((s.id,c.id)) is none else values.get((s.id,c.id))}}"></td>
+{% endfor %}
+<td><b class="live-total">{{'-' if s.score is none else s.score}}</b></td>
+<td>{% set gi=grade_info(subject.scheme_key,s.score) %}<b class="live-grade">{{gi[0]}}</b></td>
+</tr>
+{% endfor %}
+</tbody></table></div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<button class="button" type="submit">Simpan Semua Markah</button>
+<a class="button secondary" href="{{url_for('teacher_marks')}}">Kembali</a>
+</div>
+</form>
+<script>
+(function(){
+  const scheme={{ subject.scheme_key|tojson }};
+  const gradeRules={{ grade_rules|tojson }};
+  function grade(score){
+    if(score===null) return '-';
+    if(scheme==='STD100'){
+      if(score>=90)return 'Mumtaz'; if(score>=75)return 'Jayyid Jiddan';
+      if(score>=60)return 'Jayyid'; if(score>=40)return 'Maqbul'; return 'Musaadah';
+    }
+    if((scheme==='UPKK70' || scheme==='UPKK100') && gradeRules.length){
+      const found=gradeRules.find(r=>score>=Number(r.min_score) && score<=Number(r.max_score));
+      return found ? found.grade : '-';
+    }
+    return '-';
+  }
+  function recalc(row){
+    const inputs=[...row.querySelectorAll('.live-score')];
+    let total=0, complete=true;
+    inputs.forEach(i=>{ if(i.value===''){complete=false;} else {total+=Number(i.value);} });
+    row.querySelector('.live-total').textContent=complete ? Math.round(total*100)/100 : '-';
+    row.querySelector('.live-grade').textContent=complete ? grade(total) : '-';
+  }
+  document.querySelectorAll('tr[data-student]').forEach(row=>{
+    row.querySelectorAll('.live-score').forEach(i=>i.addEventListener('input',()=>recalc(row)));
+    recalc(row);
+  });
+})();
+</script>
+{% endblock %}

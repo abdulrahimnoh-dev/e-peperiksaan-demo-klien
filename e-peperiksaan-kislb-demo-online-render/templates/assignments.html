@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% block content %}
+<h1>Tugasan Guru Mata Pelajaran</h1>
+<p class="muted">Tugasan ditetapkan mengikut guru, kelas, peperiksaan dan mata pelajaran.</p>
+<div class="panel"><form method="post" class="grid-form">
+<label>Guru<select name="teacher_user_id" required>{% for t in teachers %}<option value="{{t.id}}">{{t.full_name}}</option>{% endfor %}</select></label>
+<label>Kelas<select id="classSelect" name="class_id" required>{% for c in classes %}<option value="{{c.id}}" data-year="{{c.session_year}}">{{c.session_year}} · {{c.class_name}}</option>{% endfor %}</select></label>
+<label>Peperiksaan<select id="examSelect" name="exam_id" required>{% for e in exams %}<option value="{{e.id}}" data-year="{{e.session_year}}">{{e.exam_name}}</option>{% endfor %}</select></label>
+<label>Mata Pelajaran<select id="subjectSelect" name="subject_id" required></select></label>
+<button>Simpan Tugasan</button></form></div>
+<div class="panel"><table><thead><tr><th>Sesi/Kelas</th><th>Peperiksaan</th><th>Guru</th><th>Mata Pelajaran</th><th></th></tr></thead><tbody>
+{% for a in assignments %}<tr><td>{{a.session_year}} · <b>{{a.class_name}}</b></td><td><b>{{a.exam_name}}</b></td><td>{{a.full_name}}</td><td>{{a.subject_name}}</td><td>
+<form method="post" action="{{url_for('assignment_delete')}}"><input type="hidden" name="teacher_user_id" value="{{a.teacher_user_id}}"><input type="hidden" name="class_id" value="{{a.class_id}}"><input type="hidden" name="exam_id" value="{{a.exam_id}}"><input type="hidden" name="subject_id" value="{{a.subject_id}}"><button class="danger">Buang</button></form>
+</td></tr>{% endfor %}</tbody></table></div>
+<script>
+const subjectMap={{ exam_subject_map|tojson }};
+const cls=document.getElementById('classSelect'), exam=document.getElementById('examSelect'), sub=document.getElementById('subjectSelect');
+const form=cls.closest('form'), saveBtn=form.querySelector('button');
+let msg=document.createElement('div');msg.className='muted';msg.style.gridColumn='1 / -1';form.appendChild(msg);
+
+function refreshExams(){
+ const year=cls.options[cls.selectedIndex]?.dataset.year;
+ let visible=[];
+ [...exam.options].forEach(o=>{o.hidden=o.dataset.year!==year;if(!o.hidden) visible.push(o);});
+ if(visible.length){
+   exam.disabled=false; exam.value=visible[0].value; saveBtn.disabled=false; msg.textContent='';
+ }else{
+   exam.disabled=true; saveBtn.disabled=true; msg.textContent='Belum ada peperiksaan untuk sesi '+year+'. Tambah peperiksaan sesi tersebut dahulu.';
+ }
+ refreshSubjects();
+}
+function refreshSubjects(){
+ sub.innerHTML='';
+ if(exam.disabled){sub.disabled=true;return;}
+ sub.disabled=false;
+ (subjectMap[exam.value]||[]).forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;sub.appendChild(o);});
+}
+cls.addEventListener('change',refreshExams);exam.addEventListener('change',refreshSubjects);refreshExams();
+</script>{% endblock %}

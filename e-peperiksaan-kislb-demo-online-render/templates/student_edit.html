@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Edit Murid</h1>
+<div class="panel">
+<form method="post" class="grid-form">
+<label>Nama penuh<input name="full_name" value="{{student.full_name}}" required></label>
+<label>No. MyKid<input name="mykid" value="{{student.mykid}}" required></label>
+<button>Simpan maklumat</button>
+</form>
+</div>
+<div class="panel">
+<h2>Naik / Tukar Kelas</h2>
+<form method="post" action="{{url_for('move_class',sid=student.id)}}" class="grid-form">
+<label>Kelas baharu<select name="class_id" required>{% for c in classes %}<option value="{{c.id}}">{{c.session_year}} · {{c.class_name}}</option>{% endfor %}</select></label>
+<label>Tarikh berkuat kuasa<input type="date" name="start_date"></label>
+<button>Tukar kelas</button>
+</form>
+<p class="muted">Kelas lama tidak dipadam. Slip peperiksaan lama menggunakan kelas ketika markah direkodkan.</p>
+</div>
+<div class="panel">
+<h2>Sejarah Kelas</h2>
+<table><thead><tr><th>Sesi</th><th>Tahun</th><th>Kelas</th><th>Mula</th><th>Tamat</th><th>Status</th></tr></thead><tbody>
+{% for h in history %}<tr><td>{{h.session_year}}</td><td>{{h.level}}</td><td>{{h.class_name}}</td><td>{{h.start_date or '-'}}</td><td>{{h.end_date or '-'}}</td><td>{{'Semasa' if h.is_current else 'Sejarah'}}</td></tr>{% endfor %}
+</tbody></table>
+</div>
+{% endblock %}

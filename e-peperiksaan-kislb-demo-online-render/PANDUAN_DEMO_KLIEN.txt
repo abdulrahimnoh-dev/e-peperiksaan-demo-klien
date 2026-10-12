@@ -1,0 +1,21 @@
+E-PEPERIKSAAN KISLB — DEMO BERASINGAN
+
+Akaun untuk demonstrasi sahaja. Jangan kongsi akaun admin secara terbuka.
+
+ADMIN: username admin | kata laluan -NubjDIZXSh4R2Lg5dGO
+GURU: username guru | kata laluan hy1VgA-hENDo427l3chO
+IBU: username ibu | kata laluan -BmRa8HPIPPMm_igADBv
+
+JALANKAN DI WINDOWS (PowerShell):
+1. Ekstrak ZIP ini ke folder berasingan (jangan gabung dengan projek sebenar).
+2. Buka PowerShell dalam folder e-peperiksaan-kislb.
+3. py -m pip install -r requirements.txt
+4. py app.py
+5. Layari http://127.0.0.1:5000
+6. Tekan Ctrl+C untuk hentikan.
+
+PENTING: URL localhost hanya boleh dibuka pada komputer sendiri. Untuk klien akses dari internet perlu deployment berasingan, HTTPS, secret key persekitaran yang kuat, pengurusan akses dan kawalan keselamatan. Jangan dedahkan server Flask terus ke internet.
+
+Database demo: demo_data/epeperiksaan_demo.db (akan dijana apabila mula). Tiada database sebenar dibekalkan. Untuk reset demo, hentikan server dan padam fail ini, kemudian mulakan semula.
+
+Ini ialah demo daripada kod v0.9.8; bukan portal e-Yuran production.

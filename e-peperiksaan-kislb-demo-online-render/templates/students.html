@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="split-title"><div><h1>Murid</h1><p class="muted">Satu profil murid, sejarah kelas kekal mengikut sesi.</p></div></div>
+<div class="panel">
+<h2>Tambah murid</h2>
+<form method="post" class="grid-form">
+<label>Nama penuh<input name="full_name" required></label>
+<label>No. MyKid<input name="mykid" required></label>
+<label>Kelas semasa<select name="class_id" required>{% for c in classes %}<option value="{{c.id}}">{{c.session_year}} · {{c.class_name}}</option>{% endfor %}</select></label>
+<label>Tarikh mula<input name="start_date" type="date"></label>
+<button>Tambah</button>
+</form>
+</div>
+<div class="panel">
+<table><thead><tr><th>Nama</th><th>MyKid</th><th>Kelas semasa</th><th>Tindakan</th></tr></thead><tbody>
+{% for s in students %}
+<tr><td>{{s.full_name}}</td><td>{{s.mykid}}</td><td>{{s.session_year or '-'}} · {{s.class_name or '-'}}</td><td class="actions-cell"><a class="mini-btn" href="{{url_for('student_profile',sid=s.id)}}">Profil & Keputusan</a><a class="mini-link" href="{{url_for('edit_student',sid=s.id)}}">Edit / Sejarah</a></td></tr>
+{% endfor %}
+</tbody></table>
+</div>
+{% endblock %}

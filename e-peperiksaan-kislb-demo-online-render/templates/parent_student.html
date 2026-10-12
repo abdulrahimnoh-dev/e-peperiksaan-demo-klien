@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{student.full_name}}</h1><p class="muted">{{student.mykid}}</p>
+<div class="panel">
+<h2>Keputusan diterbitkan</h2>
+{% if not exams %}<p>Belum ada keputusan yang diterbitkan.</p>{% endif %}
+<div class="action-grid">{% for e in exams %}<a class="action" href="{{url_for('slip',eid=e.id,sid=student.id)}}"><b>{{e.exam_name}}</b><span>{{e.session_year}} · Lihat / Cetak Slip</span></a>{% endfor %}</div>
+</div>
+{% endblock %}
