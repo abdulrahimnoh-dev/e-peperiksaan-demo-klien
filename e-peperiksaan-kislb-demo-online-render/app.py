@@ -123,9 +123,22 @@ def seed(con):
             SET exam_type='PERCUBAAN PSRA', exam_name='Percubaan PSRA 2026', series_no=NULL
             WHERE id=?""",(old_s3['id'],))
         configure_exam_subjects(con,old_s3['id'],'PERCUBAAN PSRA')
-    for username,password,role,name in [('admin','-NubjDIZXSh4R2Lg5dGO','admin','Pentadbir KISLB'),('guru','hy1VgA-hENDo427l3chO','teacher','Guru Demo'),('ibu','-BmRa8HPIPPMm_igADBv','parent','Ibu Bapa Demo')]:
-        if not con.execute('SELECT 1 FROM users WHERE username=?',(username,)).fetchone():
-            con.execute('INSERT INTO users(username,password_hash,role,full_name) VALUES(?,?,?,?)',(username,generate_password_hash(password),role,name))
+    # Password demo diurus melalui Render Environment, bukan dalam GitHub.
+    accounts = [
+        ('admin', os.environ.get('DEMO_ADMIN_PASSWORD'), 'admin', 'Pentadbir Demo'),
+        ('guru', os.environ.get('DEMO_GURU_PASSWORD'), 'teacher', 'Guru Demo'),
+        ('ibu', os.environ.get('DEMO_IBU_PASSWORD'), 'parent', 'Ibu Bapa Demo'),
+    ]
+    for username, password, role, name in accounts:
+        if not password:
+            raise RuntimeError(f'Environment variable password untuk {username} belum ditetapkan')
+        existing = con.execute('SELECT id FROM users WHERE username=?', (username,)).fetchone()
+        if existing:
+            con.execute('UPDATE users SET password_hash=?,role=?,full_name=? WHERE id=?',
+                        (generate_password_hash(password), role, name, existing['id']))
+        else:
+            con.execute('INSERT INTO users(username,password_hash,role,full_name) VALUES(?,?,?,?)',
+                        (username, generate_password_hash(password), role, name))
     seed_subjects(con)
     for yr,level,name in [(2026,5,'5 Al-Farabi'),(2026,5,'5 Al-Biruni'),(2027,6,'6 Al-Farabi')]: con.execute('INSERT OR IGNORE INTO classes(session_year,level,class_name) VALUES(?,?,?)',(yr,level,name))
     demo=[('Ahmad Demo','150101-10-0001'),('Aisyah Demo','150101-10-0002'),('Hafiz Demo','150101-10-0003'),('Maryam Demo','150101-10-0004'),('Umar Demo','150101-10-0005'),('Sofea Demo','150101-10-0006')]

@@ -1,6 +1,7 @@
 services:
   - type: web
     name: e-peperiksaan-kislb-demo
+    rootDir: e-peperiksaan-kislb-demo-online-render
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
@@ -8,5 +9,11 @@ services:
     envVars:
       - key: DEMO_SECRET_KEY
         generateValue: true
+      - key: DEMO_ADMIN_PASSWORD
+        sync: false
+      - key: DEMO_GURU_PASSWORD
+        sync: false
+      - key: DEMO_IBU_PASSWORD
+        sync: false
       - key: PYTHON_VERSION
         value: 3.11.11
